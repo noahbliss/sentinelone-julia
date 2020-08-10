@@ -2,8 +2,12 @@
 import HTTP
 import JSON
 using DelimitedFiles
+using JuliaDB
+#settingsfile = "settings.conf"
+backupsettingsfile = "$(homedir())/.config/sentinelone-julia/settings.conf"
+(@isundefined settingsfile) && isfile(backupsettingsfile) && settingsfile = backupsettingsfile
+isfile(settingsfile) || println("Settings file is missing.") && exit(code=1)
 
-settingsfile = "settings.conf"
 importedvars = readdlm(settingsfile, '=', String; skipblanks=true)
 a2var(key, a) = (c=1; for i in getindex(a, :, 1); key == i && return getindex(a, c, 2) ; c=c+1; end | error("$key not found"))
 
@@ -24,3 +28,8 @@ end
 fire(query) = webreq(tenant, apitoken, query)
 
 result = fire("agents")
+
+for i in result["data"]
+        println(i)
+        println("\n\n")
+end
