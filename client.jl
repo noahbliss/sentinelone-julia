@@ -5,7 +5,7 @@ using DelimitedFiles
 using JuliaDB
 #settingsfile = "settings.conf"
 backupsettingsfile = "$(homedir())/.config/sentinelone-julia/settings.conf"
-(@isundefined settingsfile) && isfile(backupsettingsfile) && settingsfile = backupsettingsfile
+@isdefined(settingsfile) || isfile(backupsettingsfile) && (settingsfile = backupsettingsfile)
 isfile(settingsfile) || println("Settings file is missing.") && exit(code=1)
 
 importedvars = readdlm(settingsfile, '=', String; skipblanks=true)
