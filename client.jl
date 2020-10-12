@@ -9,8 +9,7 @@ backupsettingsfile = "$(homedir())/.config/sentinelone-julia/settings.conf"
 isfile(settingsfile) || println("Settings file is missing.") && exit(1)
 
 importedvars = readdlm(settingsfile, '=', String; skipblanks=true)
-#a2var(key, a) = (c=1; for i in getindex(a, :, 1); i == key && return getindex(a, c, 2) ; c=c+1; end || error("$key not found"))
-a2var(key, a) = (c=1; for i in a[:, 1]; i == key && return a[c, 2]; c=c+1; end || error("$key not found"))
+a2var(key, a) = (c=1; for i in a[:, 1]; i == key && return a[c, 2]; c+=1; end || error("$key not found"))
 
 tenant = a2var("tenant", importedvars)
 apitoken = a2var("apitoken", importedvars)
@@ -26,7 +25,6 @@ function webreq(tenant, apitoken, query)
 end
 
 function pageloop(tenant, apitoken, query)
-        #query="agents?limit=100"
         cursor = "staged"
         result = Vector{Any}()
         while cursor !== nothing
@@ -36,15 +34,15 @@ function pageloop(tenant, apitoken, query)
                 else
                         newquery=query
                 end
-                #Make the request
+                #Make the request.
                 response = webreq(tenant, apitoken, newquery)
-                #Initialize or append data.
+                #Initialize or append result.
                 if ! @isdefined(result)
                         result = response["data"]
                 else
                         append!(result, response["data"])
                 end
-                #Move the cursor
+                #Move the cursor.
                 cursor = (response["pagination"])["nextCursor"]
         end
         return result
@@ -53,4 +51,26 @@ end
 # Function fire
 fire(query) = pageloop(tenant, apitoken, query)
 
-fire("agents")
+# Store all agent data as vector "agents"
+agents = fire("agents?limit=100")
+
+
+
+
+# Examples below:
+
+# Print out everything on all agents.
+for agent in agents
+        for key in agent
+                println(key[1]," = ",key[2]) #note some keys are themselves dictionaries or arrays, e.g. locations and networkInterfaces
+        end
+end
+
+
+# Print everything for the first agent.
+for key in agents[1]
+        println(key[1]," = ",key[2]) #note some keys are themselves dictionaries or arrays, e.g. locations and networkInterfaces
+end
+
+# Agent 1, nic 1, IPv4 1
+agents[1]["networkInterfaces"][1]["inet"][1]
