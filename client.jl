@@ -9,8 +9,8 @@ backupsettingsfile = "$(homedir())/.config/sentinelone-julia/settings.conf"
 isfile(settingsfile) || println("Settings file is missing.") && exit(1)
 
 importedvars = readdlm(settingsfile, '=', String; skipblanks=true)
-a2var(key, a) = (c=1; for i in getindex(a, :, 1); key == i && return getindex(a, c, 2) ; c=c+1; end || error("$key not found"))
-
+#a2var(key, a) = (c=1; for i in getindex(a, :, 1); i == key && return getindex(a, c, 2) ; c=c+1; end || error("$key not found"))
+a2var(key, a) = (c=1; for i in a[:, 1]; i == key && return a[c, 2]; c=c+1; end || error("$key not found"))
 
 tenant = a2var("tenant", importedvars)
 apitoken = a2var("apitoken", importedvars)
@@ -25,11 +25,32 @@ function webreq(tenant, apitoken, query)
         # return response.body
 end
 
-fire(query) = webreq(tenant, apitoken, query)
-
-result = fire("agents")
-
-for i in result["data"]
-        println(i)
-        println("\n\n")
+function pageloop(tenant, apitoken, query)
+        #query="agents?limit=100"
+        cursor = "staged"
+        result = Vector{Any}()
+        while cursor !== nothing
+                #Check if first run.
+                if cursor !== "staged"
+                        newquery = "$query?cursor=$cursor"
+                else
+                        newquery=query
+                end
+                #Make the request
+                response = webreq(tenant, apitoken, newquery)
+                #Initialize or append data.
+                if ! @isdefined(result)
+                        result = response["data"]
+                else
+                        append!(result, response["data"])
+                end
+                #Move the cursor
+                cursor = (response["pagination"])["nextCursor"]
+        end
+        return result
 end
+
+# Function fire
+fire(query) = pageloop(tenant, apitoken, query)
+
+fire("agents")
