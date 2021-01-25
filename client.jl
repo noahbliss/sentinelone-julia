@@ -52,25 +52,4 @@ end
 fire(query) = pageloop(tenant, apitoken, query)
 
 # Store all agent data as vector "agents"
-agents = fire("agents?limit=100")
-
-
-
-
-# Examples below:
-
-# Print out everything on all agents.
-for agent in agents
-        for key in agent
-                println(key[1]," = ",key[2]) #note some keys are themselves dictionaries or arrays, e.g. locations and networkInterfaces
-        end
-end
-
-
-# Print everything for the first agent.
-for key in agents[1]
-        println(key[1]," = ",key[2]) #note some keys are themselves dictionaries or arrays, e.g. locations and networkInterfaces
-end
-
-# Agent 1, nic 1, IPv4 1
-agents[1]["networkInterfaces"][1]["inet"][1]
+agents = fire("agents")
