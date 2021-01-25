@@ -2,7 +2,7 @@
 import HTTP
 import JSON
 using DelimitedFiles
-using JuliaDB
+
 #settingsfile = "settings.conf"
 backupsettingsfile = "$(homedir())/.config/sentinelone-julia/settings.conf"
 @isdefined(settingsfile) || isfile(backupsettingsfile) && (settingsfile = backupsettingsfile)
