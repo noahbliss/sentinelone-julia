@@ -15,7 +15,7 @@ tenant = a2var("tenant", importedvars)
 apitoken = a2var("apitoken", importedvars)
 
 
-function webreq(tenant, apitoken, query)
+function req(tenant, apitoken, query)
         url = "$tenant/web/api/v2.1/$query"
         headers = ["Authorization" => "ApiToken $apitoken"]
         response = HTTP.request("GET", url, headers; require_ssl_verification = true)
@@ -24,7 +24,7 @@ function webreq(tenant, apitoken, query)
         # return response.body
 end
 
-function pageloop(tenant, apitoken, query)
+function pagedreq(tenant, apitoken, query)
         cursor = "staged"
         result = Vector{Any}()
         while cursor !== nothing
@@ -32,10 +32,10 @@ function pageloop(tenant, apitoken, query)
                 if cursor !== "staged"
                         newquery = "$query?cursor=$cursor"
                 else
-                        newquery=query
+                        newquery = query
                 end
                 #Make the request.
-                response = webreq(tenant, apitoken, newquery)
+                response = req(tenant, apitoken, newquery)
                 #Initialize or append result.
                 if ! @isdefined(result)
                         result = response["data"]
@@ -49,7 +49,11 @@ function pageloop(tenant, apitoken, query)
 end
 
 # Function fire
-fire(query) = pageloop(tenant, apitoken, query)
+q(query) = webreq(tenant, apitoken, query)
+pq(query) = pagedreq(tenant, apitoken, query)
 
 # Store all agent data as vector "agents"
-agents = fire("agents")
+# agents = pq("agents")
+
+# Get group information
+# groups = pq("groups")
