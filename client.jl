@@ -54,6 +54,5 @@ pq(query) = pagedreq(tenant, apitoken, query)
 
 # Store all agent data as vector "agents"
 # agents = pq("agents")
-
 # Get group information
 # groups = pq("groups")
