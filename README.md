@@ -11,7 +11,7 @@ Modify client.jl to your needs. Examples are included below.
 ## Agents.  
 Agents operations for the examples below require an "agents" vector. Make it with: 
 ```
-agents = fire("agents")
+agents = pq("agents")
 ```
 
 ### See if S1 is installed on machines in a list.  
